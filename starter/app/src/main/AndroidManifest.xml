@@ -13,6 +13,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Listen for the device starting up -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
         android:name=".MyApp"
@@ -21,8 +23,15 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/NewTheme">
         <activity android:name=".locationreminders.ReminderDescriptionActivity"></activity>
+        <activity android:name=".locationreminders.RemindersActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -35,16 +44,18 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".authentication.AuthenticationActivity">
+        <activity android:name=".authentication.AuthenticationActivity"
+                  android:launchMode="singleTask">
+
         </activity>
-        <activity android:name=".locationreminders.RemindersActivity" >
+        <receiver android:name=".locationreminders.geofence.GeofenceBootCompletedBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
+                <!-- REGISTER TO RECEIVE BOOT_COMPLETED EVENTS -->
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
-
-        </activity>
+        </receiver>
         <receiver
             android:name=".locationreminders.geofence.GeofenceBroadcastReceiver"
             android:enabled="true"

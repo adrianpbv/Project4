@@ -16,6 +16,8 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        resConfigs "en","es" // enable uses of two languages
     }
     buildTypes {
         release {
@@ -37,6 +39,15 @@ android {
     //}
     buildFeatures {
         dataBinding true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 }
 
@@ -74,6 +85,9 @@ dependencies {
 
     //Coroutines Dependencies
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
+
+    // Enable FirebaseUi library to authenticate users
+    implementation 'com.firebaseui:firebase-ui-auth:8.0.0'
 
     //Koin
     implementation "org.koin:koin-android:$koinVersion"

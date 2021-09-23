@@ -32,6 +32,17 @@ class ReminderDescriptionActivity : AppCompatActivity() {
             this,
             R.layout.activity_reminder_description
         )
-//        TODO: Add the implementation of the reminder details
+        intent.extras?.let { reminderBundle ->
+            if (reminderBundle.containsKey(EXTRA_ReminderDataItem)) {
+                // get the information of the reminder
+                binding.reminderDataItem =
+                    intent.getSerializableExtra(EXTRA_ReminderDataItem) as ReminderDataItem
+            }
+        }
+
+        binding.button2.setOnClickListener {
+            finish() // close the description activity of the location reminder
+        }
     }
+
 }

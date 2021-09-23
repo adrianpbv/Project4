@@ -40,9 +40,9 @@ fun sendNotification(context: Context, reminderDataItem: ReminderDataItem) {
     val notificationPendingIntent = stackBuilder
         .getPendingIntent(getUniqueId(), PendingIntent.FLAG_UPDATE_CURRENT)
 
-//    build the notification object with the data to be shown
+//  build the notification object with the data to be shown
     val notification = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
-        .setSmallIcon(R.mipmap.ic_launcher)
+        .setSmallIcon(R.drawable.ic_baseline_where_to_vote_24)
         .setContentTitle(reminderDataItem.title)
         .setContentText(reminderDataItem.location)
         .setContentIntent(notificationPendingIntent)
