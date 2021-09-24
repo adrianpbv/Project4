@@ -78,21 +78,16 @@ class ReminderListFragmentTest : AutoCloseKoinTest() {
             Navigation.setViewNavController(it.view!!, navController)
         }
 
+        Thread.sleep(3000) // the showed SnackBar can obscure the addReminder FAB, so give it
+                                // time to fade off
+
         // WHEN - Click on the "+" button
         onView(withId(R.id.addReminderFAB)).perform(ViewActions.click())
 
         // THEN - Verify that we navigate to the add screen
         verify(navController).navigate(
             ReminderListFragmentDirections.toSaveReminder()
-        ) // got error here
-//        Wanted but not invoked:
-//        navController.navigate(
-//            ActionOnlyNavDirections(actionId=2131231213)
-//        );
-        // Actually, there were zero interactions with this mock.
-
-        // the answer here
-        // https://knowledge.udacity.com/questions/560547 // didn't help I tried that way and nothing
+        )
     }
 
     // test the displayed data on the UI.
