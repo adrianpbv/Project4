@@ -14,6 +14,7 @@ import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import androidx.test.rule.ActivityTestRule
 import com.udacity.project4.locationreminders.RemindersActivity
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
@@ -47,17 +48,17 @@ class RemindersActivityTest :
 
     private lateinit var repository: ReminderDataSource
     private lateinit var appContext: Application
+    // An Idling Resource that waits for Data Binding to have no pending bindings.
+    private val dataBindingIdlingResource = DataBindingIdlingResource()
 
-    @get:Rule
-    var activityScenarioRule = ActivityScenarioRule(RemindersActivity::class.java)
+//    @get:Rule
+//    var activityScenarioRule = ActivityScenarioRule(RemindersActivity::class.java)
 //    @Rule
 //    val instantTaskExecutorRule = InstantTaskExecutorRule()
 
 //    @Rule
 //    val activityRule = ActivityTestRule(RemindersActivity::class.java)
 
-    // An Idling Resource that waits for Data Binding to have no pending bindings.
-    private val dataBindingIdlingResource = DataBindingIdlingResource()
 
     /**
      * As we use Koin as a Service Locator Library to develop our code, we'll also use Koin to test our code.
@@ -145,7 +146,7 @@ class RemindersActivityTest :
     }
 
     @Test
-    fun addLocationReminder() {
+    fun addLocationReminder_showSavedToast() {
         // start with a reminder
         addReminder()
 
@@ -176,20 +177,15 @@ class RemindersActivityTest :
         // Save the reminder into the database
         onView(withId(R.id.saveReminder)).perform(click()) // save reminder
 
+        // Check that the toast is displayed
         // Next approach to test Toast is not working with api 30
         // https://github.com/android/android-test/issues/803#issue-744609125
         // Either with this way as given at https://stackoverflow.com/a/38379219/
-        if (android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.Q) {
-            onView(withText(R.string.reminder_saved)).inRoot(
-                withDecorView(
-                    not(
-                        `is`(
-                            getActivity(activityScenario)!!.window.decorView
-                        )
-                    )
-                )
-            ).check(matches(isDisplayed()))
-        }
+//        if (android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.Q) {
+//            onView(withText(R.string.reminder_saved)).inRoot(
+//                withDecorView(not(`is`(getActivity(activityScenario)!!.window.decorView)))
+//            ).check(matches(isDisplayed()))
+//        }
 
         // check that the reminder was successfully added
         onView(withText("Title2")).check(matches(isDisplayed()))
@@ -199,48 +195,24 @@ class RemindersActivityTest :
     }
 
     @Test
-    fun showErrorWhenAnEmptyTitle() {
+    fun showSnackBarError_WhenAnEmptyTitle() {
         val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
         dataBindingIdlingResource.monitorActivity(activityScenario)
 
         // Click on the "+" button to add a new reminder
         onView(withId(R.id.addReminderFAB)).perform(click())
-        // Navigate to the map to choose a location
-        onView(withId(R.id.selectLocation)).perform(click())
 
-        // In this case the device's current location will be selected,
-        // then navigates to save the reminder
-        onView(withId(R.id.pickLocation)).perform(click())
-
-        // finish writing the details of the location reminder
-        onView(withId(R.id.reminderTitle)).perform(
-            typeText("Title2")
-        )
+        //writing some text in the description field
         onView(withId(R.id.reminderDescription)).perform(
             typeText("Description2"),
             closeSoftKeyboard()
         )
 
-        // Save the reminder into the database
+        // Try to save the reminder into the database
         onView(withId(R.id.saveReminder)).perform(click()) // save reminder
 
-        // Next approach to test Toast is not working with api 30
-        // https://github.com/android/android-test/issues/803#issue-744609125
-        // Either with this way as given at https://stackoverflow.com/a/38379219/
-        if (android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.Q) {
-            onView(withText(R.string.reminder_saved)).inRoot(
-                withDecorView(
-                    not(
-                        `is`(
-                            getActivity(activityScenario)!!.window.decorView
-                        )
-                    )
-                )
-            ).check(matches(isDisplayed()))
-        }
-
-        // check that the reminder was successfully added
-        onView(withText("Title2")).check(matches(isDisplayed()))
+        onView(withId(com.google.android.material.R.id.snackbar_text))
+            .check(matches(withText("Please enter title")))
 
         //  Make sure the activity is closed.
         activityScenario.close()

@@ -6,8 +6,12 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.content.IntentSender
 import android.util.Log
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.Fragment
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
+import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.R
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
@@ -16,22 +20,38 @@ import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
  * Class to create and start a location reminder by adding geofence
  */
 class GeofenceLocation(
-    private val activity: Activity,
+    private val fragment: Fragment,
     private val viewModel: SaveReminderViewModel
 ) {
 
     private var reminderDataItem: ReminderDataItem? = null
     private val geofencePendingIntent: PendingIntent by lazy {
-        val intent = Intent(activity.applicationContext, GeofenceBroadcastReceiver::class.java)
+        val intent = Intent(fragment.requireContext(), GeofenceBroadcastReceiver::class.java)
         intent.action = ACTION_GEOFENCE_EVENT
         // Use FLAG_UPDATE_CURRENT so that you get the same pending intent back when calling
         // addGeofences() and removeGeofences().
         PendingIntent.getBroadcast(
-            activity.applicationContext,
+            fragment.requireContext(),
             0,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT
         )
+    }
+
+    private val resultLauncher = fragment.registerForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            checkDeviceLocationSettingsAndStartGeofence()
+        } else {
+            Snackbar.make(
+                fragment.requireView(),
+                R.string.location_required_error,
+                Snackbar.LENGTH_INDEFINITE
+            ).setAction(android.R.string.ok) {
+                checkDeviceLocationSettingsAndStartGeofence()
+            }.show()
+        }
     }
 
     fun setReminderDataItem(reminderDataItem: ReminderDataItem) {
@@ -52,7 +72,7 @@ class GeofenceLocation(
 
         // Using LocationServices to get the Settings Client and create
         // a val called locationSettingsResponseTask to check the location settings.
-        val settingsClient = LocationServices.getSettingsClient(activity)
+        val settingsClient = LocationServices.getSettingsClient(fragment.requireActivity())
         val locationSettingsResponseTask =
             settingsClient.checkLocationSettings(builder.build())
 
@@ -62,12 +82,10 @@ class GeofenceLocation(
                 // Location settings are not satisfied, but this can be fixed
                 // by showing the user a dialog.
                 try {
-                    // Show the dialog by calling startResolutionForResult(),
-                    // and check the result in onActivityResult().
-                    exception.startResolutionForResult(
-                        activity,
-                        REQUEST_TURN_DEVICE_LOCATION_ON
-                    )
+                    // Show a dialog to activate the location service
+                    val intentSenderRequest =
+                        IntentSenderRequest.Builder(exception.resolution).build()
+                    resultLauncher.launch(intentSenderRequest)
                 } catch (sendEx: IntentSender.SendIntentException) {
                     Log.e(TAG, "Error getting location settings resolution: " + sendEx.message)
                 }
@@ -119,7 +137,7 @@ class GeofenceLocation(
             .addGeofence(geofence)
             .build()
 
-        val geofencingClient = LocationServices.getGeofencingClient(activity)
+        val geofencingClient = LocationServices.getGeofencingClient(fragment.requireActivity())
 
         // Add the new geofence request with the new geofence
         geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
@@ -129,7 +147,7 @@ class GeofenceLocation(
             }
             addOnFailureListener {
                 // there was an issue in adding the geofences.
-                viewModel.showErrorMessage.value = activity.applicationContext.getString(
+                viewModel.showErrorMessage.value = fragment.requireContext().getString(
                     R.string.geofences_not_added
                 )
                 if ((it.message != null)) {
@@ -142,7 +160,6 @@ class GeofenceLocation(
     companion object {
         private const val TAG = "GeofenceLocation"
         const val GEOFENCE_RADIUS_IN_METERS = 200f
-        const val REQUEST_TURN_DEVICE_LOCATION_ON = 29
         const val ACTION_GEOFENCE_EVENT =
             "GeofenceTransitionsJobIntentService.locationReminder.action.ACTION_GEOFENCE_EVENT"
     }

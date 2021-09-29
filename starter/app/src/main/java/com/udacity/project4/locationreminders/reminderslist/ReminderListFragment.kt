@@ -1,9 +1,7 @@
 package com.udacity.project4.locationreminders.reminderslist
 
-import android.Manifest
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
@@ -72,31 +70,14 @@ class ReminderListFragment : BaseFragment() {
         setupRecyclerView()
 
         binding.addReminderFAB.setOnClickListener {
-            if (!permissionManager.foregroundPermissionApproved()) {
-                Log.i("ReminderListFragment", "addReminderFAB")
-                permissionManager.requestLocationPermissions(false)
-            } else {
-                Log.i("ReminderListFragment", "addReminderFAB AnotherSIDE")
-                navigateToAddReminder()
-            }
+            navigateToAddReminder()
         }
-
     }
 
     override fun onResume() {
         super.onResume()
         //load the reminders list on the ui
         _viewModel.loadReminders()
-
-        // check the location permissions if there are any active geofences.
-        if (!_viewModel.remindersList.value.isNullOrEmpty() //cambiar este chequeo
-            && !permissionManager.foregroundAndBackgroundLocationPermissionApproved()
-        ) {
-            if (!permissionManager.foregroundPermissionApproved())
-                permissionManager.requestLocationPermissions(false)
-            else if (permissionManager.isApiVerQorLater())
-                permissionManager.requestLocationPermissions(true)
-        }
     }
 
     private fun navigateToAddReminder() {
@@ -119,7 +100,7 @@ class ReminderListFragment : BaseFragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.logout -> {
-            //  Logout implementation
+                //  Logout implementation
                 AlertDialog.Builder(requireContext())
                     .setTitle(R.string.log_out_delete_data)
                     .setMessage(R.string.delete_all_data)
@@ -130,7 +111,7 @@ class ReminderListFragment : BaseFragment() {
                             .addOnCompleteListener {
                                 if (!it.isSuccessful) {
                                     _viewModel.showSnackBarInt.value = R.string.logging_out_error
-                                }else{
+                                } else {
                                     _viewModel.deleteAllReminders()
                                     // Instead of deleting all the user's information when logging out,
                                     // it's better store a field in the database with the user name

@@ -27,13 +27,13 @@ abstract class BaseFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-            _viewModel.showErrorMessage.observe(this, Observer {
-                wrapEspressoIdlingResource{
-                    ToastManager.makeText(activity, it, Toast.LENGTH_LONG).show()
-                }
+        _viewModel.showErrorMessage.observe(this, Observer {
+            wrapEspressoIdlingResource {
+                ToastManager.makeText(activity, it, Toast.LENGTH_LONG).show()
+            }
         })
         _viewModel.showToast.observe(this, Observer {
-            wrapEspressoIdlingResource{
+            wrapEspressoIdlingResource {
                 ToastManager.makeText(activity, it, Toast.LENGTH_LONG).show()
             }
         })
@@ -55,43 +55,4 @@ abstract class BaseFragment : Fragment() {
             }
         })
     }
-
-    /**
-     * Handle the result of the user's permission
-     */
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        Log.i("ReminderListFragment", "onRequestPermissionsResult")
-        if (
-            grantResults.isEmpty() || // the interaction was interrupted and the permission request was cancelled.
-            grantResults[LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED ||
-            (requestCode == PermissionManager.REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE &&
-                    grantResults[BACKGROUND_LOCATION_PERMISSION_INDEX] ==
-                    PackageManager.PERMISSION_DENIED)
-        ) {
-            // Permission denied.
-            Snackbar.make(
-                requireView(),
-                R.string.permission_denied_explanation,
-                Snackbar.LENGTH_INDEFINITE
-            )
-                .setAction(R.string.settings) {
-                    // Displays App settings screen.
-
-                    startActivity(Intent().apply {
-                        action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                        data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null)
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    })
-                }.show()
-        }
-//        else {
-//            //navigateToAddReminder()
-//        }
-    }
 }
-private const val LOCATION_PERMISSION_INDEX = 0
-private const val BACKGROUND_LOCATION_PERMISSION_INDEX = 1

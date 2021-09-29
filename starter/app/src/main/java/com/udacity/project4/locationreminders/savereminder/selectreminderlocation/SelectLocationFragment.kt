@@ -2,6 +2,7 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 
 
 import android.annotation.SuppressLint
+import android.content.res.Resources
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -39,7 +40,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_select_location, container, false)
 
@@ -106,8 +107,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         // Set up for long click on the map
         setMapLongClick(gmap)
         setPoiClick(gmap)
-
-        //setMapStyle(gmap)
     }
 
     private fun onLocationSelected() {
@@ -163,6 +162,10 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
             gmap.mapType = GoogleMap.MAP_TYPE_TERRAIN
             true
         }
+        R.id.style_map -> {
+            setMapStyle(gmap)
+            true
+        }
         else -> super.onOptionsItemSelected(item)
     }
 
@@ -216,8 +219,27 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
             gmap.isMyLocationEnabled = true
             true
         } else {
-            permissionManager.requestLocationPermissions(false)
+            gmap.isMyLocationEnabled = false
             false
+        }
+    }
+
+    private fun setMapStyle(map: GoogleMap) {
+        try {
+            // Customize the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            val success = map.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    requireContext(),
+                    R.raw.map_style
+                )
+            )
+
+            if (!success) {
+                Log.e(TAG, "Style parsing failed.")
+            }
+        } catch (e: Resources.NotFoundException) {
+            Log.e(TAG, "Can't find style. Error: ", e)
         }
     }
 
