@@ -1,18 +1,10 @@
 package com.udacity.project4.base
 
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
-import android.provider.Settings
-import android.util.Log
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
-import com.udacity.project4.BuildConfig
-import com.udacity.project4.R
-import com.udacity.project4.utils.PermissionManager
 import com.udacity.project4.utils.ToastManager
 import com.udacity.project4.utils.wrapEspressoIdlingResource
 

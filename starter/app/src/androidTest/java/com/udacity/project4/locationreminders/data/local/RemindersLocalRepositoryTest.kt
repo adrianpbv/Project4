@@ -41,6 +41,10 @@ class RemindersLocalRepositoryTest {
 
     @Before
     fun setup() {
+
+        // setMain() set TestCoroutineDispatcher as a delegate inside the class provided by Dispatchers.Main .
+        Dispatchers.setMain(TestCoroutineDispatcher()) // switch the Dispatcher to use Test Dispatcher
+
         // Using an in-memory database for testing, because it doesn't survive killing the process.
         database = Room.inMemoryDatabaseBuilder(
             ApplicationProvider.getApplicationContext(),
@@ -57,11 +61,14 @@ class RemindersLocalRepositoryTest {
     }
 
     @After
-    fun cleanUp() = database.close()
+    fun cleanUp() {
+        database.close()
+        Dispatchers.resetMain()
+    }
 
     @Test
     fun saveReminder_retrievesReminderById() {
-        Dispatchers.setMain(TestCoroutineDispatcher()) // switch the Dispatcher to use Test Dispatcher
+        //Dispatchers.setMain(TestCoroutineDispatcher()) // switch the Dispatcher to use Test Dispatcher
 
         runBlockingTest {
             // GIVEN - A new location reminder saved in the database.
@@ -78,13 +85,11 @@ class RemindersLocalRepositoryTest {
             assertThat(savedReminder.data.title, `is`("title"))
             assertThat(savedReminder.data.description, `is`("description"))
         }
-        Dispatchers.resetMain() // clean it up
+        //Dispatchers.resetMain() // clean it up
     }
 
     @Test
     fun retrievesReminderById_getErrorIdNotFund() {
-        Dispatchers.setMain(TestCoroutineDispatcher()) // switch the Dispatcher to use Test Dispatcher
-
         runBlockingTest {
             // GIVEN - A new location reminder saved in the database.
             addReminder()
@@ -96,13 +101,10 @@ class RemindersLocalRepositoryTest {
             // THEN - Same reminder is returned.
             assertThat(savedReminder.error, `is`(true))
         }
-        Dispatchers.resetMain() // clean it up
     }
 
     @Test
     fun deleteAllReminders_retrievesEmptyList() {
-        Dispatchers.setMain(TestCoroutineDispatcher())
-
         runBlockingTest {
             addReminder()
 
@@ -115,7 +117,6 @@ class RemindersLocalRepositoryTest {
             val emptyList = localDataSource.getReminders() as Result.Success
             assertThat(emptyList.data.isNullOrEmpty(), `is`(true))
         }
-        Dispatchers.resetMain() // clean it up
     }
 
     private fun addReminder() = runBlocking {

@@ -61,13 +61,13 @@
                 android:id="@+id/selectedLocation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/reminderDescription"
+                android:layout_alignBaseline="@id/selectLocation"
+                android:layout_alignParentEnd="true"
                 android:layout_marginEnd="@dimen/margin_normal"
                 android:text="@{viewModel.reminderSelectedLocationStr}"
                 android:textColor="@color/black"
-                tools:text="Location"
-                android:layout_below="@id/reminderDescription"
-                android:layout_alignParentEnd="true"
-                android:layout_alignBaseline="@id/selectLocation"/>
+                tools:text="Location" />
 
             <ProgressBar
                 android:id="@+id/progressBar"
